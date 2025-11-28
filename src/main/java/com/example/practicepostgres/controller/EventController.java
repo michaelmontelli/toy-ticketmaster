@@ -1,7 +1,11 @@
 package com.example.practicepostgres.controller;
 
+import com.example.practicepostgres.api.CreateEventRequest;
 import com.example.practicepostgres.model.Event;
+import com.example.practicepostgres.model.Venue;
+import com.example.practicepostgres.repository.VenueRepository;
 import com.example.practicepostgres.service.EventService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,30 +20,24 @@ import java.util.List;
 @RequestMapping("/events")
 public class EventController {
     private final EventService eventService;
+    private final VenueRepository venueRepository;
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, VenueRepository venueRepository) {
         this.eventService = eventService;
+        this.venueRepository = venueRepository;
     }
 
     @GetMapping
     public ResponseEntity<List<Event>> listEvents() {
-        List<Event> events;
-        try {
-            events = eventService.listEvents();
-            return ResponseEntity.ok().body(events);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<Event> events = eventService.listEvents();
+        return ResponseEntity.ok().body(events);
     }
 
     @PostMapping
-    public ResponseEntity<List<Event>> createEvents(@RequestBody List<Event> events) {
-        List<Event> results;
-        try {
-            results = eventService.createEvents(events);
-            return ResponseEntity.status(HttpStatus.CREATED).body(results);
-        } catch (RuntimeException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<Event>> createEvents(
+            @Valid @RequestBody List<CreateEventRequest> requests
+    ) {
+        List<Event> results = eventService.createEvents(requests);
+        return ResponseEntity.status(HttpStatus.CREATED).body(results);
     }
 }

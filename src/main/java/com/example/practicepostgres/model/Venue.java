@@ -19,5 +19,6 @@ public class Venue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String city;
     private Integer capacity;
 }
