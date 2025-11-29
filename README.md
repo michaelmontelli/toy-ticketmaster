@@ -4,7 +4,7 @@ Learning Java concurrency, Spring Boot, and PostgreSQL through a ticket booking 
 
 ## Learning Goals
 
-- Database concurrency: pessimistic/optimistic locking, deadlock prevention
+- Database concurrency: pessimistic locking, deadlock prevention
 - Transaction management and isolation levels
 - PostgreSQL partial indexes and constraints
 - Spring async processing and scheduled tasks
