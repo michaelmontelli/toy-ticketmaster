@@ -6,6 +6,7 @@ import com.example.practicepostgres.repository.ReservationRepository;
 import com.example.practicepostgres.repository.SeatRepository;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class ReservationService {
     private static final Duration RESERVATION_EXPIRATION = Duration.ofMinutes(5);
 
@@ -36,12 +38,16 @@ public class ReservationService {
         @NonNull Long seatId,
         @NonNull String userEmail
     ) {
+        log.info("Attempting to reserve seat {} for user {}",  seatId, userEmail);
         LocalDateTime currentTime = LocalDateTime.now();
 
-        var seat = seatRepository.findById(seatId).orElseThrow(
+        log.debug("Acquiring lock on seat {}", seatId);
+        var seat = seatRepository.findByIdForUpdate(seatId).orElseThrow(
             () -> new RuntimeException("Seat not found")
         );
+        log.debug("Lock acquired on seat {}", seatId);
         if (seat.getStatus() != SeatStatus.AVAILABLE) {
+            log.warn("Seat {} is not available (status: {})", seatId, seat.getStatus());
             throw new RuntimeException("Seat is not available");
         }
 
@@ -65,6 +71,8 @@ public class ReservationService {
         seat.setStatus(SeatStatus.RESERVED);
         seatRepository.save(seat);
 
+        log.info("Successfully created reservation {} for seat {} and user {}",
+            reservation.getId(), seatId, userEmail);
         return reservation;
     }
 

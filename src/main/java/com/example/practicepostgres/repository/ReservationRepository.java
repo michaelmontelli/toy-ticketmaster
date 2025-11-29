@@ -7,5 +7,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    public List<Reservation> findBySeat_IdAndExpiresAtAfter(Long seatId, LocalDateTime time);
+    List<Reservation> findBySeat_IdAndExpiresAtAfter(Long seatId, LocalDateTime time);
 }
