@@ -30,7 +30,7 @@ public class EventController {
     @GetMapping
     public ResponseEntity<List<Event>> listEvents() {
         List<Event> events = eventService.listEvents();
-        return ResponseEntity.ok().body(events);
+        return ResponseEntity.ok(events);
     }
 
     @PostMapping
