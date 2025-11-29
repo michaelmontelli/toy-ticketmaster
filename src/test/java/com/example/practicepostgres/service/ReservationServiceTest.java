@@ -16,7 +16,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -133,24 +132,22 @@ class ReservationServiceTest {
         var latch = new CountDownLatch(threadCount);
         var successCount = new AtomicInteger(0);
         var failureCount = new AtomicInteger(0);
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-
-        for (int i = 0; i < threadCount; i++) {
-            var userEmail = "user" + i + "@test.com";
-            executor.submit(() -> {
-                try {
-                    reservationService.createReservation(seat.getId(), userEmail);
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failureCount.incrementAndGet();
-                } finally {
-                    latch.countDown();
-                }
-            });
+        try (var executor = Executors.newFixedThreadPool(threadCount)) {
+            for (int i = 0; i < threadCount; i++) {
+                var userEmail = "user" + i + "@test.com";
+                executor.submit(() -> {
+                    try {
+                        reservationService.createReservation(seat.getId(), userEmail);
+                        successCount.incrementAndGet();
+                    } catch (Exception e) {
+                        failureCount.incrementAndGet();
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            latch.await();
         }
-
-        latch.await();
-        executor.shutdown();
 
         // Then: Only one reservation should succeed
         assertThat(successCount.get()).isEqualTo(1);
